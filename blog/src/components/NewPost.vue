@@ -1,6 +1,10 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
+
 import axios from "axios"
+import { routerKey } from 'vue-router';
+
+const emit = defineEmits(['upDateBlog', 'showForm'])
 
 const post = reactive(
     {
@@ -9,23 +13,55 @@ const post = reactive(
     }
 )
 
-function sendForm() {
-    axios.post('http://localhost:3000/new-post', post)
-        .then(function (response) {
-            console.log(response);
+let selectedFile = ref(null)
+const closeForm = () => {
+    emit('showForm')
+}
+
+const sendForm = async () => {
+
+    if (
+        post && selectedFile.value
+    ) {
+        const form = new FormData();
+        const stringPost = JSON.stringify(post)
+        form.append('file', selectedFile.value);
+        form.append('post', stringPost);
+
+
+        const res = await axios.post('http://localhost:3000/new-post', form, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
         })
-        .catch(function (error) {
-            console.log(error);
-        })
+            .then(function (res) {
+                emit('upDateBlog')
+                console.log(res.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+    }
+
+}
+function onFileChanged(event) {
+    selectedFile.value = event.target.files[0]
 }
 </script>
 <template>
     <div class="container">
         <div class="form">
             <input type="text" placeholder="Заголовок" v-model="post.title">
+            <input type="file" @change="onFileChanged">
             <textarea placeholder="Текст" v-model="post.text"></textarea>
-            <button @click="sendForm()">Отправить</button>
+            <div class="buttons">
+                <button @click="closeForm()">Закрыть</button>
+
+                <button @click="sendForm()">Отправить</button>
+            </div>
+
         </div>
+
     </div>
 </template>
 <style scoped>
@@ -53,8 +89,14 @@ textarea {
 }
 
 button {
-    width: 300px;
+    min-width: 200px;
     line-height: 30px;
+    margin: 10px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
 }
 
 @media (max-width: 1200px) {
