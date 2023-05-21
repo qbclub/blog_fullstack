@@ -18,7 +18,7 @@ let selectedFile = ref(null)
 const sendForm = async () => {
 
     if (
-        post && selectedFile.value
+        post.title && selectedFile.value
     ) {
         const form = new FormData();
         const stringPost = JSON.stringify(post)
