@@ -14,9 +14,6 @@ const post = reactive(
 )
 
 let selectedFile = ref(null)
-const closeForm = () => {
-    emit('showForm')
-}
 
 const sendForm = async () => {
 
@@ -36,6 +33,7 @@ const sendForm = async () => {
         })
             .then(function (res) {
                 emit('upDateBlog')
+                emit('showForm')
                 console.log(res.data);
             })
             .catch(function (error) {
